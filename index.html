@@ -342,6 +342,155 @@
             border-color: #2ecc71;
             box-shadow: 0 0 20px rgba(46, 204, 113, 0.6);
         }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 25px 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+
+            .puzzle {
+                padding: 20px;
+            }
+
+            .puzzle-title {
+                font-size: 1.2em;
+                margin-bottom: 15px;
+            }
+
+            .puzzle-text {
+                font-size: 0.95em;
+            }
+
+            .wire-container {
+                gap: 20px;
+            }
+
+            .wire {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .code-digit {
+                width: 55px;
+                height: 65px;
+                font-size: 28px;
+            }
+
+            .code-input-container {
+                gap: 10px;
+            }
+
+            .safe-button {
+                font-size: 24px;
+                min-height: 60px;
+            }
+
+            .safe-display {
+                font-size: 28px;
+                padding: 15px;
+                letter-spacing: 5px;
+            }
+
+            .pattern-grid {
+                max-width: 250px;
+                gap: 8px;
+            }
+
+            .pattern-dot {
+                min-height: 60px;
+            }
+
+            .success-icon {
+                font-size: 70px;
+            }
+
+            .success-message {
+                padding: 25px;
+                font-size: 1em;
+            }
+
+            .hint {
+                font-size: 13px;
+                padding: 12px;
+            }
+
+            .hint-box {
+                padding: 18px;
+                font-size: 14px;
+            }
+
+            button {
+                padding: 13px 25px;
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .wire-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .wire-side {
+                gap: 10px;
+            }
+
+            .code-digit {
+                width: 50px;
+                height: 60px;
+                font-size: 24px;
+            }
+
+            .safe-container {
+                gap: 10px;
+            }
+
+            .safe-button {
+                font-size: 20px;
+                min-height: 55px;
+            }
+
+            .pattern-grid {
+                max-width: 220px;
+            }
+
+            .pattern-dot {
+                min-height: 50px;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) {
+            .wire, .safe-button, .pattern-dot {
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .wire:active {
+                transform: scale(0.95);
+            }
+
+            .safe-button:active {
+                transform: scale(0.9);
+            }
+
+            .pattern-dot:active {
+                transform: scale(0.9);
+            }
+        }
     </style>
 </head>
 <body>
@@ -430,6 +579,7 @@
                     <button class="safe-button" onclick="addDigit(0)">0</button>
                     <button class="safe-button" onclick="checkCode()" style="background: rgba(46, 204, 113, 0.3);">✓</button>
                 </div>
+                <div class="hint">💡 Подсказка: Год основания Google (1998)</div>
                 <div class="error" id="error3">Неверный код!</div>
             </div>
         </div>
@@ -440,7 +590,7 @@
                 <div class="success-icon">🎉</div>
                 <h2 style="color: #3498db; margin-bottom: 20px; font-size: 2.5em;">ПОЗДРАВЛЯЮ!</h2>
                 <div class="success-message">
-                    <strong>🏆 ТЫ ПРОШЛА КВЕСТ! 🏆</strong><br><br>
+                    <strong>🏆 ТЫ ПРОШЁЛ КВЕСТ! 🏆</strong><br><br>
                     Вот тебе подсказка:<br><br>
                     <strong>Ищи в Telegram нашу переписку и найди дату 4-5 февраля.</strong><br>
                     Там будут следующие твои подсказки!
@@ -537,7 +687,7 @@
         }
 
         function checkCode() {
-            if (safeCode === '2509') {
+            if (safeCode === '1998') {
                 document.getElementById('progress3').classList.add('completed');
                 currentStage = 'success';
                 setTimeout(() => nextStage('success'), 500);
