@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escape Quest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            background: rgba(15, 15, 30, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(52, 152, 219, 0.2);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #3498db, #8e44ad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
+        }
+
+        .quest-stage {
+            display: none;
+        }
+
+        .quest-stage.active {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .puzzle {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .puzzle-title {
+            color: #3498db;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .puzzle-text {
+            color: #ecf0f1;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .wire-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .wire-side {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .wire {
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .wire.left {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+        }
+
+        .wire.right {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: #2ecc71;
+        }
+
+        .wire.selected {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .wire.correct {
+            background: rgba(46, 204, 113, 0.4);
+            animation: pulse 0.5s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .code-input-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .code-digit {
+            width: 70px;
+            height: 80px;
+            font-size: 36px;
+            text-align: center;
+            background: rgba(52, 152, 219, 0.1);
+            border: 3px solid #3498db;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .code-digit:focus {
+            outline: none;
+            border-color: #2ecc71;
+            box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+        }
+
+        .safe-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .safe-button {
+            aspect-ratio: 1;
+            background: rgba(52, 152, 219, 0.2);
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .safe-button:hover {
+            background: rgba(52, 152, 219, 0.4);
+            transform: scale(1.05);
+        }
+
+        .safe-button:active {
+            transform: scale(0.95);
+        }
+
+        .safe-display {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 32px;
+            letter-spacing: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #3498db;
+            color: #2ecc71;
+            font-family: 'Courier New', monospace;
+        }
+
+        button {
+            background: linear-gradient(135deg, #3498db, #8e44ad);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .error {
+            color: #e74c3c;
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .progress-step {
+            width: 30%;
+            height: 8px;
+            background: rgba(52, 152, 219, 0.2);
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .progress-step.completed {
+            background: linear-gradient(135deg, #3498db, #8e44ad);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+
+        .success-page {
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #3498db, #8e44ad);
+            color: white;
+            padding: 35px;
+            border-radius: 15px;
+            margin: 20px 0;
+            line-height: 2;
+            font-size: 1.15em;
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
+        }
+
+        .hint-box {
+            background: rgba(241, 196, 15, 0.2);
+            border: 2px solid #f1c40f;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .hint-box strong {
+            color: #f1c40f;
+        }
+
+        .hint {
+            background: rgba(52, 152, 219, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            border-left: 4px solid #3498db;
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 30px auto;
+            max-width: 300px;
+        }
+
+        .pattern-dot {
+            aspect-ratio: 1;
+            background: rgba(52, 152, 219, 0.2);
+            border: 3px solid #3498db;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pattern-dot.active {
+            background: #2ecc71;
+            border-color: #2ecc71;
+            box-shadow: 0 0 20px rgba(46, 204, 113, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔓 ESCAPE QUEST 🔓</h1>
+        
+        <div class="progress">
+            <div class="progress-step" id="progress1"></div>
+            <div class="progress-step" id="progress2"></div>
+            <div class="progress-step" id="progress3"></div>
+        </div>
+
+        <!-- Stage 1: Wire Puzzle -->
+        <div class="quest-stage active" id="stage1">
+            <div class="puzzle">
+                <div class="puzzle-title">⚡ СОЕДИНИ ПРОВОДА</div>
+                <div class="puzzle-text">
+                    Соедини цветные провода с правильными портами.<br>
+                    Нажми на левый провод, затем на правый порт.
+                </div>
+                <div class="wire-container">
+                    <div class="wire-side">
+                        <div class="wire left" data-color="red" onclick="selectWire('red')">🔴 КРАСНЫЙ</div>
+                        <div class="wire left" data-color="blue" onclick="selectWire('blue')">🔵 СИНИЙ</div>
+                        <div class="wire left" data-color="green" onclick="selectWire('green')">🟢 ЗЕЛЁНЫЙ</div>
+                        <div class="wire left" data-color="yellow" onclick="selectWire('yellow')">🟡 ЖЁЛТЫЙ</div>
+                    </div>
+                    <div class="wire-side">
+                        <div class="wire right" data-port="green" onclick="connectWire('green')">PORT A</div>
+                        <div class="wire right" data-port="red" onclick="connectWire('red')">PORT B</div>
+                        <div class="wire right" data-port="yellow" onclick="connectWire('yellow')">PORT C</div>
+                        <div class="wire right" data-port="blue" onclick="connectWire('blue')">PORT D</div>
+                    </div>
+                </div>
+                <div class="hint">💡 Подсказка: Красный → B, Синий → D, Зелёный → A, Жёлтый → C</div>
+                <div class="error" id="error1">Неправильное соединение!</div>
+            </div>
+        </div>
+
+        <!-- Stage 2: Pattern Lock -->
+        <div class="quest-stage" id="stage2">
+            <div class="puzzle">
+                <div class="puzzle-title">🔐 ГРАФИЧЕСКИЙ КЛЮЧ</div>
+                <div class="puzzle-text">
+                    Введи правильный паттерн.<br>
+                    Нажми на точки в правильном порядке.
+                </div>
+                <div class="pattern-grid" id="patternGrid">
+                    <div class="pattern-dot" data-pos="1" onclick="addToPattern(1)"></div>
+                    <div class="pattern-dot" data-pos="2" onclick="addToPattern(2)"></div>
+                    <div class="pattern-dot" data-pos="3" onclick="addToPattern(3)"></div>
+                    <div class="pattern-dot" data-pos="4" onclick="addToPattern(4)"></div>
+                    <div class="pattern-dot" data-pos="5" onclick="addToPattern(5)"></div>
+                    <div class="pattern-dot" data-pos="6" onclick="addToPattern(6)"></div>
+                    <div class="pattern-dot" data-pos="7" onclick="addToPattern(7)"></div>
+                    <div class="pattern-dot" data-pos="8" onclick="addToPattern(8)"></div>
+                    <div class="pattern-dot" data-pos="9" onclick="addToPattern(9)"></div>
+                </div>
+                <div class="hint">💡 Подсказка: Нарисуй букву "Z" - точки 1, 3, 5, 7, 9</div>
+                <button onclick="checkPattern()">Проверить паттерн</button>
+                <button onclick="resetPattern()" style="background: rgba(231, 76, 60, 0.8); margin-top: 10px;">Сбросить</button>
+                <div class="error" id="error2">Неверный паттерн!</div>
+            </div>
+        </div>
+
+        <!-- Stage 3: Code Safe -->
+        <div class="quest-stage" id="stage3">
+            <div class="puzzle">
+                <div class="puzzle-title">🔢 КОДОВЫЙ ЗАМОК</div>
+                <div class="puzzle-text">
+                    Открой сейф, введя правильный 4-значный код.<br>
+                    Используй кнопки ниже.
+                </div>
+                <div class="safe-display" id="safeDisplay">----</div>
+                <div class="safe-container">
+                    <button class="safe-button" onclick="addDigit(1)">1</button>
+                    <button class="safe-button" onclick="addDigit(2)">2</button>
+                    <button class="safe-button" onclick="addDigit(3)">3</button>
+                    <button class="safe-button" onclick="addDigit(4)">4</button>
+                    <button class="safe-button" onclick="addDigit(5)">5</button>
+                    <button class="safe-button" onclick="addDigit(6)">6</button>
+                    <button class="safe-button" onclick="addDigit(7)">7</button>
+                    <button class="safe-button" onclick="addDigit(8)">8</button>
+                    <button class="safe-button" onclick="addDigit(9)">9</button>
+                    <button class="safe-button" onclick="clearCode()" style="background: rgba(231, 76, 60, 0.3);">C</button>
+                    <button class="safe-button" onclick="addDigit(0)">0</button>
+                    <button class="safe-button" onclick="checkCode()" style="background: rgba(46, 204, 113, 0.3);">✓</button>
+                </div>
+                <div class="error" id="error3">Неверный код!</div>
+            </div>
+        </div>
+
+        <!-- Success Page -->
+        <div class="quest-stage" id="success">
+            <div class="success-page">
+                <div class="success-icon">🎉</div>
+                <h2 style="color: #3498db; margin-bottom: 20px; font-size: 2.5em;">ПОЗДРАВЛЯЮ!</h2>
+                <div class="success-message">
+                    <strong>🏆 ТЫ ПРОШЛА КВЕСТ! 🏆</strong><br><br>
+                    Вот тебе подсказка:<br><br>
+                    <strong>Ищи в Telegram нашу переписку и найди дату 4-5 февраля.</strong><br>
+                    Там будут следующие твои подсказки!
+                </div>
+                <div class="hint-box">
+                    <strong>🔍 ВАЖНО:</strong> Внимательно просмотри все сообщения за эти даты. Важная информация может быть скрыта в деталях, фото или файлах!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStage = 1;
+        let selectedWire = null;
+        let connections = { red: false, blue: false, green: false, yellow: false };
+        let pattern = [];
+        let safeCode = '';
+
+        // Stage 1: Wire Puzzle
+        function selectWire(color) {
+            if (connections[color]) return;
+            
+            document.querySelectorAll('.wire.left').forEach(w => w.classList.remove('selected'));
+            document.querySelector(`.wire.left[data-color="${color}"]`).classList.add('selected');
+            selectedWire = color;
+        }
+
+        function connectWire(port) {
+            if (!selectedWire) {
+                showError('error1');
+                return;
+            }
+
+            if (selectedWire === port) {
+                connections[selectedWire] = true;
+                document.querySelector(`.wire.left[data-color="${selectedWire}"]`).classList.add('correct');
+                document.querySelector(`.wire.right[data-port="${port}"]`).classList.add('correct');
+                selectedWire = null;
+
+                if (Object.values(connections).every(v => v)) {
+                    setTimeout(() => {
+                        document.getElementById('progress1').classList.add('completed');
+                        nextStage(2);
+                    }, 500);
+                }
+            } else {
+                showError('error1');
+                document.querySelectorAll('.wire.left').forEach(w => w.classList.remove('selected'));
+                selectedWire = null;
+            }
+        }
+
+        // Stage 2: Pattern Lock
+        function addToPattern(pos) {
+            if (pattern.includes(pos)) return;
+            
+            pattern.push(pos);
+            document.querySelector(`.pattern-dot[data-pos="${pos}"]`).classList.add('active');
+        }
+
+        function checkPattern() {
+            const correctPattern = [1, 3, 5, 7, 9];
+            
+            if (JSON.stringify(pattern) === JSON.stringify(correctPattern)) {
+                document.getElementById('progress2').classList.add('completed');
+                setTimeout(() => nextStage(3), 500);
+            } else {
+                showError('error2');
+                resetPattern();
+            }
+        }
+
+        function resetPattern() {
+            pattern = [];
+            document.querySelectorAll('.pattern-dot').forEach(dot => dot.classList.remove('active'));
+        }
+
+        // Stage 3: Safe Code
+        function addDigit(digit) {
+            if (safeCode.length < 4) {
+                safeCode += digit;
+                updateSafeDisplay();
+            }
+        }
+
+        function clearCode() {
+            safeCode = '';
+            updateSafeDisplay();
+        }
+
+        function updateSafeDisplay() {
+            const display = safeCode.padEnd(4, '-');
+            document.getElementById('safeDisplay').textContent = display;
+        }
+
+        function checkCode() {
+            if (safeCode === '2509') {
+                document.getElementById('progress3').classList.add('completed');
+                currentStage = 'success';
+                setTimeout(() => nextStage('success'), 500);
+            } else {
+                showError('error3');
+                setTimeout(() => {
+                    safeCode = '';
+                    updateSafeDisplay();
+                }, 1000);
+            }
+        }
+
+        function nextStage(stage) {
+            document.querySelectorAll('.quest-stage').forEach(s => s.classList.remove('active'));
+            document.getElementById(stage === 'success' ? 'success' : 'stage' + stage).classList.add('active');
+            if (stage !== 'success') currentStage = stage;
+        }
+
+        function showError(errorId) {
+            const error = document.getElementById(errorId);
+            error.classList.add('show');
+            setTimeout(() => error.classList.remove('show'), 2000);
+        }
+    </script>
+</body>
+</html>
